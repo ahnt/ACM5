@@ -9,6 +9,9 @@
 /* Begin PBXBuildFile section */
 		84AF8CCA144DFBC9008F80B1 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84AF8CC9144DFBC9008F80B1 /* main.cpp */; };
 		84AF8CCC144DFBC9008F80B1 /* ACM5.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = 84AF8CCB144DFBC9008F80B1 /* ACM5.1 */; };
+		84AF8CD5144DFE17008F80B1 /* chemistry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84AF8CD3144DFE17008F80B1 /* chemistry.cpp */; };
+		84AF8CD9144E02D1008F80B1 /* world.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84AF8CD7144E02D1008F80B1 /* world.cpp */; };
+		84AF8CDC144E0302008F80B1 /* viech.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84AF8CDA144E0302008F80B1 /* viech.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -28,6 +31,14 @@
 		84AF8CC5144DFBC9008F80B1 /* ACM5 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ACM5; sourceTree = BUILT_PRODUCTS_DIR; };
 		84AF8CC9144DFBC9008F80B1 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		84AF8CCB144DFBC9008F80B1 /* ACM5.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = ACM5.1; sourceTree = "<group>"; };
+		84AF8CD2144DFE10008F80B1 /* globals.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = globals.h; sourceTree = "<group>"; };
+		84AF8CD3144DFE17008F80B1 /* chemistry.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chemistry.cpp; sourceTree = "<group>"; };
+		84AF8CD4144DFE17008F80B1 /* chemistry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chemistry.h; sourceTree = "<group>"; };
+		84AF8CD6144E0212008F80B1 /* pos_chem_reactions.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = pos_chem_reactions.txt; path = work/pos_chem_reactions.txt; sourceTree = SOURCE_ROOT; };
+		84AF8CD7144E02D1008F80B1 /* world.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = world.cpp; sourceTree = "<group>"; };
+		84AF8CD8144E02D1008F80B1 /* world.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = world.h; sourceTree = "<group>"; };
+		84AF8CDA144E0302008F80B1 /* viech.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = viech.cpp; sourceTree = "<group>"; };
+		84AF8CDB144E0302008F80B1 /* viech.h */ = {isa = PBXFileReference; fileEncoding = 4; path = viech.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -61,7 +72,15 @@
 			isa = PBXGroup;
 			children = (
 				84AF8CC9144DFBC9008F80B1 /* main.cpp */,
+				84AF8CD2144DFE10008F80B1 /* globals.h */,
+				84AF8CD3144DFE17008F80B1 /* chemistry.cpp */,
+				84AF8CD4144DFE17008F80B1 /* chemistry.h */,
+				84AF8CD7144E02D1008F80B1 /* world.cpp */,
+				84AF8CD8144E02D1008F80B1 /* world.h */,
+				84AF8CDA144E0302008F80B1 /* viech.cpp */,
+				84AF8CDB144E0302008F80B1 /* viech.h */,
 				84AF8CCB144DFBC9008F80B1 /* ACM5.1 */,
+				84AF8CD6144E0212008F80B1 /* pos_chem_reactions.txt */,
 			);
 			path = ACM5;
 			sourceTree = "<group>";
@@ -114,6 +133,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				84AF8CCA144DFBC9008F80B1 /* main.cpp in Sources */,
+				84AF8CD5144DFE17008F80B1 /* chemistry.cpp in Sources */,
+				84AF8CD9144E02D1008F80B1 /* world.cpp in Sources */,
+				84AF8CDC144E0302008F80B1 /* viech.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
