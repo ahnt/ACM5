@@ -10,27 +10,18 @@ double MOL=10000000000000000000;
 
 t_viech::t_viech()
 {
-	this->chr_A=NULL;
-	this->chr_B=NULL;
+	this->chromosome.clear();
 	this->genes=NULL;
 	this->activity=NULL;
     this->nrPointingAtMe=1;
     this->ancestor=NULL;
     this->energy=0.0;
+    changeLog.clear();
 }
 
 t_viech::~t_viech()
 {
-	if(chr_A!=NULL)
-	{
-		delete chr_A;
-		chr_A=NULL;
-	}
-	if(chr_B!=NULL)
-	{
-		delete chr_B;
-		chr_B=NULL;
-	}
+    chromosome.clear();
 	if(genes!=NULL)
 	{
 		delete genes;
@@ -59,37 +50,65 @@ void t_viech::show(t_chemistry *chemistry)
 			printf("\n");
 		}
 }
+void t_viech::inherit(t_viech *from,double mutationRate,double duplicationRate,double deletionRate){
+    from->nrPointingAtMe++;
+    ancestor=from;
+    chromosome=from->chromosome;
+    for(int i=0;i<chromosome.size();i++)
+        for(int j=0;j<chromosome[i].size();j++)
+                if(((double)rand()/(double)RAND_MAX)<mutationRate){
+                    chromosome[i][j]=rand()&255;//(chromosome[i][j]&(255-(3<<k)))+((rand()&3)<<k);
+                    char n[100];
+                    sprintf(n,"M %i %i\n",i,j);
+                    changeLog.append(n);
+                }
+    if(((double)rand()/(double)RAND_MAX)<duplicationRate){
+        int width,fromChr,toChr,startFromC,startToC;
+        vector<unsigned char> thePiece;
+        fromChr=(int)(rand()%chromosome.size());
+        toChr=(int)(rand()%chromosome.size());
+        if(chromosome[toChr].size()<20000){
+            width=64+(rand()&511);
+            startFromC=(int)(rand()%(chromosome[fromChr].size()-width));
+            startToC=(int)(rand()%(chromosome[toChr].size()-width));
+            thePiece.assign(chromosome[fromChr].begin()+startFromC,chromosome[fromChr].begin()+startFromC+width);
+            chromosome[toChr].insert(chromosome[toChr].begin()+startToC,thePiece.begin(),thePiece.end());
+            char n[1000];
+            sprintf(n,"D %i %i %i %i %i\n",fromChr,toChr,width,startFromC,startToC);
+            changeLog.append(n);
+        }
+    }
+    if(((double)rand()/(double)RAND_MAX)<deletionRate){
+        int width,from,chr;
+        chr=rand()%(int)chromosome.size();
+        if(chromosome[chr].size()>1000){
+            width=rand()&255;
+            from=1+(rand()%((int)chromosome[chr].size()-width));
+            chromosome[chr].erase(chromosome[chr].begin(),chromosome[chr].begin()+width);
+            char n[100];
+            sprintf(n, "E %i %i %i\n",chr,from,width);
+        }
+    }
+}
+
 
 void t_viech::fill_chr_rand(int length_A, int length_B)
 {
-	int32_t z;
-	this->length_chr_A=length_A;
-	this->length_chr_B=length_B;
-	chr_A=new unsigned char[this->length_chr_A];
-	chr_B=new unsigned char[this->length_chr_B];
-	for(z=0;z<this->length_chr_A;z++)
-		this->chr_A[z]=rand()&255;
-	for(z=0;z<this->length_chr_B;z++)
-		this->chr_B[z]=rand()&255;
+    chromosome.resize(2);
+    chromosome[0].resize(length_A);
+    chromosome[1].resize(length_B);
+    for(int i=0;i<chromosome.size();i++)
+        for(int j=0;j<chromosome[i].size();j++)
+		this->chromosome[i][j]=(unsigned char)(rand()&255);
 }
 int32_t t_viech::how_many_genes(void)
 {
-	int z;
-	int32_t i=0;
-	for(z=0;z<length_chr_A;z++)
-		if ((chr_A[z])<=gene_code) //0 
-		{
-			i++;
-			//z=(z+16)&262128;
-		}
-	for(z=0;z<length_chr_B;z++)
-		if ((chr_B[z])<=gene_code) //0
-		{
-			i++;
-			//z=(z+16)&262128;
-		}
-	//return i;
-		return i;
+	int32_t k=0;
+    for(int i=0;i<chromosome.size();i++)
+        for(int j=0;j<chromosome[i].size();j++)
+            if (chromosome[i][j]<=gene_code)
+                k++;
+		return k;
 }
 int32_t t_viech::how_many_working_genes(void)
 {
@@ -112,28 +131,18 @@ void t_viech::setup_proteom(t_chemistry *chemistry)
 		this->n_comp[z]=(double)0.0;
 	}
 	g=0;
-	for(z=0;z<this->length_chr_A;z++)
-		if(this->chr_A[z]<=gene_code)
-		{
-			for(i=0;i<5;i++)
-			genes[g].domain[i]=	((int)this->chr_A[(z+3+(i*3))%length_chr_A]<<16)+
-								((int)this->chr_A[(z+4+(i*3))%length_chr_A]<<8)+
-								((int)this->chr_A[(z+5+(i*3))%length_chr_A]);
-			genes[g].n=((double)chr_A[(z+1)%length_chr_A]+(double) 1.0)/(double)256000.0;
-			genes[g].ident=id_what[chr_A[(z+2)%length_chr_A]&15];
-			g++;
-		}
-	for(z=0;z<this->length_chr_B;z++)
-		if(this->chr_B[z]<=gene_code)
-		{
-			for(i=0;i<5;i++)
-			genes[g].domain[i]=	((int)this->chr_B[(z+3+(i*3))%length_chr_B]<<16)+
-								((int)this->chr_B[(z+4+(i*3))%length_chr_B]<<8)+
-								((int)this->chr_B[(z+5+(i*3))%length_chr_B]);
-			genes[g].n=((double)chr_B[(z+1)%length_chr_B]+(double) 1.0)/(double)256000.0;
-			genes[g].ident=id_what[chr_B[(z+2)%length_chr_B]&15];
-			g++;
-		}
+    for(int i=0;i<chromosome.size();i++)
+        for(int j=0;j<chromosome[i].size();j++)
+            if(this->chromosome[i][j]<=gene_code)
+            {
+                for(int k=0;k<5;k++)
+                    genes[g].domain[k]=	((int)this->chromosome[i][(j+3+(k*3))%this->chromosome[i].size()]<<16)+
+                                        ((int)this->chromosome[i][(j+4+(k*3))%this->chromosome[i].size()]<<8)+
+                                        ((int)this->chromosome[i][(j+5+(k*3))%this->chromosome[i].size()]);
+                genes[g].n=((double)this->chromosome[i][(j+1)%this->chromosome[i].size()]+(double) 1.0)/(double)256000.0;
+                genes[g].ident=id_what[chromosome[i][(j+2)%chromosome[i].size()]&15];
+                g++;
+            }
 	for(z=0;z<hmg;z++)
 	{
 		switch(this->genes[z].ident){
@@ -325,154 +334,6 @@ void t_viech::calc_nucleotide_needs(void)
 {
 }
 
-void t_viech::fill_chr_klone_of(t_viech *from)
-{
-	int z;
-	if(chr_A!=NULL)
-	{
-		delete chr_A;
-		chr_A=NULL;
-	}
-	if(chr_B!=NULL)
-	{
-		delete chr_B;
-		chr_B=NULL;
-	}
-	this->length_chr_A=from->length_chr_A;
-	this->length_chr_B=from->length_chr_B;
-	this->chr_A=new unsigned char [this->length_chr_A];
-	this->chr_B=new unsigned char [this->length_chr_B];
-	for(z=0;z<this->length_chr_A;z++)
-		this->chr_A[z]=from->chr_A[z];
-	for(z=0;z<this->length_chr_B;z++)
-		this->chr_B[z]=from->chr_B[z];
-    ancestor=from;
-    from->nrPointingAtMe++;
-}
-
-void t_viech::mutate(int32_t how_many)
-{
-	int z;
-	int wo;
-	unsigned char *old;
-	for(z=0;z<how_many;z++)
-		if((rand()&1)==0)
-		{
-			wo=rand()%length_chr_A;
-			old=new unsigned char[1];
-			old[0]=chr_A[wo];
-			chr_A[wo]=rand()&255;
-		}
-		else
-		{
-			wo=rand()%length_chr_B;
-			old=new unsigned char[1];
-			old[0]=chr_B[wo];
-			chr_B[wo]=rand()&255;
-		}
-	
-}
-
-
-void t_viech::insertion(int how_many)
-{
-	
-}
-
-void t_viech::deletion(int how_many)
-{
-	int z;
-	int d_pos;
-	unsigned char *reserve;
-	unsigned char *old;
-	if((rand()&1)==0)
-	{
-		if (this->length_chr_A>how_many)
-		{
-			d_pos=(rand()%(this->length_chr_A-how_many));
-			reserve=new unsigned char[length_chr_A];
-			for(z=0;z<this->length_chr_A;z++)
-				reserve[z]=this->chr_A[z];
-			delete chr_A; chr_A=NULL;
-			chr_A=new unsigned char[this->length_chr_A-how_many];
-			for(z=0;z<d_pos;z++)
-				chr_A[z]=reserve[z];
-			for(z=d_pos;z<length_chr_A-how_many;z++)
-				chr_A[z]=reserve[z+how_many];
-			length_chr_A-=how_many;
-			
-			old=new unsigned char[how_many];	
-			for(z=d_pos;z<d_pos+how_many;z++)
-				old[z-d_pos]=reserve[z];
-			delete reserve;
-		}
-	}
-	else
-	{
-		if (this->length_chr_B>how_many)
-		{
-			d_pos=(rand()%(this->length_chr_B-how_many));
-			reserve=new unsigned char[length_chr_B];
-			for(z=0;z<this->length_chr_B;z++)
-				reserve[z]=this->chr_B[z];
-			delete chr_B; chr_B=NULL;
-			chr_B=new unsigned char[this->length_chr_B-how_many];
-			for(z=0;z<d_pos;z++)
-				chr_B[z]=reserve[z];
-			for(z=d_pos;z<length_chr_B-how_many;z++)
-				chr_B[z]=reserve[z+how_many];
-			length_chr_B-=how_many;
-			old=new unsigned char[how_many];	
-			for(z=d_pos;z<d_pos+how_many;z++)
-				old[z-d_pos]=reserve[z];
-			delete reserve;
-		}
-	}
-}
-
-void t_viech::duplication(int32_t how_many)
-{
-	int d_pos;
-	int z;
-	unsigned char *reserve;
-	
-	if((rand()&1)==0)
-	{
-		if (this->length_chr_A>how_many)
-		{
-			d_pos=rand()%(this->length_chr_A-how_many);
-			reserve=new unsigned char[this->length_chr_A];
-			for(z=0;z<this->length_chr_A;z++)
-				reserve[z]=this->chr_A[z];
-			delete chr_A; chr_A=NULL;
-			chr_A=new unsigned char[length_chr_A+how_many];
-			for(z=0;z<d_pos+how_many;z++)
-				chr_A[z]=reserve[z];
-			for(z=d_pos+how_many;z<length_chr_A+how_many;z++)
-				chr_A[z]=reserve[z-how_many];
-			this->length_chr_A+=how_many;
-			delete reserve;
-		}
-	}
-	else
-	{
-		if (this->length_chr_B>how_many)
-		{
-			d_pos=rand()%(this->length_chr_B-how_many);
-			reserve=new unsigned char[this->length_chr_B];
-			for(z=0;z<this->length_chr_B;z++)
-				reserve[z]=this->chr_B[z];
-			delete chr_B; chr_B=NULL;
-			chr_B=new unsigned char[length_chr_B+how_many];
-			for(z=0;z<d_pos+how_many;z++)
-				chr_B[z]=reserve[z];
-			for(z=d_pos+how_many;z<length_chr_B+how_many;z++)
-				chr_B[z]=reserve[z-how_many];
-			this->length_chr_B+=how_many;
-			delete reserve;
-		}
-	}
-}
 
 void t_viech::save_proteom_network(int name,char *path, t_chemistry *chemistry)
 {
@@ -595,6 +456,115 @@ void t_viech::save_proteom_network(int name,char *path, t_chemistry *chemistry)
      */
 }
 
+void t_viech::showProteomNetwork(t_chemistry *chemistry){
+	int z;
+	int i,j;
+	for(z=0;z<hmg;z++)
+	{
+		switch (genes[z].ident)
+		{
+			case 0:
+				printf("IMPORT:	");
+				for(i=0;i<12;i++)
+					printf("%i",(chemistry->compound[genes[z].A]>>(i*2))&3);
+				printf("\n");
+				break;
+			case 1:
+				printf("EXPORT:	");
+				for(i=0;i<12;i++)
+					printf("%i",(chemistry->compound[genes[z].A]>>(i*2))&3);
+				printf("\n");
+				break;
+			case 2:
+				printf("MOLREACT:	");
+				for(i=0;i<12;i++)
+				{
+					if(i==genes[z].wo_A) printf("|");
+					printf("%i",(chemistry->compound[genes[z].A]>>(i*2))&3);
+				}
+				printf("	");
+				for(i=0;i<12;i++)
+				{
+					if(i==genes[z].wo_B) printf("|");
+					printf("%i",(chemistry->compound[genes[z].B]>>(i*2))&3);
+                    
+				}
+				printf("	");
+				for(i=0;i<12;i++)
+					printf("%i",(chemistry->compound[genes[z].AP]>>(i*2))&3);
+				printf("	");
+				for(i=0;i<12;i++)
+					printf("%i",(chemistry->compound[genes[z].BP]>>(i*2))&3);
+				printf("\n");
+				break;
+			case 3:
+				printf("FLAGELLUM:	");
+				for(i=0;i<12;i++)
+				{
+					if(i==genes[z].wo_A) printf("|");
+					printf("%i",(chemistry->compound[genes[z].A]>>(i*2))&3);
+				}
+				printf("	");
+				for(i=0;i<12;i++)
+				{
+					if(i==genes[z].wo_A) printf("|");
+					printf("%i",(chemistry->compound[genes[z].B]>>(i*2))&3);
+				}
+				printf("	");
+				for(i=0;i<12;i++)
+				{
+					if(i==genes[z].wo_A) printf("|");
+					printf("%i",(chemistry->compound[genes[z].AP]>>(i*2))&3);
+				}
+				printf("	");
+				for(i=0;i<12;i++)
+				{
+					if(i==genes[z].wo_A) printf("|");
+					printf("%i",(chemistry->compound[genes[z].BP]>>(i*2))&3);
+				}
+				printf("\n");
+				break;
+			case 4:
+				printf("CILIA:	");
+				for(i=0;i<12;i++)
+				{
+					if(i==genes[z].wo_A) printf("|");
+					printf("%i",(chemistry->compound[genes[z].A]>>(i*2))&3);
+				}
+				printf("	");
+				for(i=0;i<12;i++)
+				{
+					if(i==genes[z].wo_A) printf("|");
+					printf("%i",(chemistry->compound[genes[z].B]>>(i*2))&3);
+				}
+				printf("	");
+				for(i=0;i<12;i++)
+				{
+					if(i==genes[z].wo_A) printf("|");
+					printf("%i",(chemistry->compound[genes[z].AP]>>(i*2))&3);
+				}
+				printf("	");
+				for(i=0;i<12;i++)
+				{
+					if(i==genes[z].wo_A) printf("|");
+					printf("%i",(chemistry->compound[genes[z].BP]>>(i*2))&3);
+				}
+				printf("\n");
+				break;
+		}
+	}
+	for(z=0;z<hmg;z++)
+		switch(genes[z].ident)
+	{
+		case 0:printf("IMPORT:	%i\n",genes[z].A); break;
+		case 1:printf("EXPORT:	%i\n",genes[z].A); break;
+		case 2:printf("REACTION:	%i	%i	%i	%i\n",genes[z].A,genes[z].B,genes[z].AP,genes[z].BP); break;
+		case 3:printf("FLAGELLUM:	%i	%i	%i	%i\n",genes[z].A,genes[z].B,genes[z].AP,genes[z].BP); break;
+		case 4:printf("CILIA:	%i	%i	%i	%i\n",genes[z].A,genes[z].B,genes[z].AP,genes[z].BP); break;
+	}
+}
+
+
 void t_viech::save_genome(int name)
 {
     printf("WARING NO save_gemome FUNCTION!\n");
@@ -615,71 +585,30 @@ void t_viech::save_genome(int name)
  */
 }
 
-void t_viech::load_genome(int name, char *path)
+void t_viech::load_genome(char *filename)
 {
-    printf("GENOME NOT LOADED!\n");
-    /*
-	char n[200],nu[200];
 	FILE *f;
 	int z;
 	int i;
-	unsigned char c;
-	_itoa_s(name,nu,200,10);
-	strcpy(n,path);
-	strcat(n,nu);
-	strcat(n,".txt");
-	f=fopen(n,"r+t");
+    int length_chr_A,length_chr_B;
+	f=fopen(filename,"r+t");
 	fscanf(f,"%i	%i\n",&length_chr_A,&length_chr_B);
-	chr_A=new unsigned char[length_chr_A];
-	chr_B=new unsigned char[length_chr_B];
-	for(z=0;z<this->length_chr_A;z++)
+    chromosome.resize(2);
+    chromosome[0].resize(length_chr_A);
+    chromosome[1].resize(length_chr_B);
+	for(z=0;z<length_chr_A;z++)
 	{
 		fscanf(f,"%i",&i);
-		this->chr_A[z]=i&255;
+		this->chromosome[0][z]=i&255;
 	}
-	for(z=0;z<this->length_chr_B;z++)
+	for(z=0;z<length_chr_B;z++)
 	{
 		fscanf(f,"%i",&i);
-		this->chr_B[z]=i&255;
+		this->chromosome[1][z]=i&255;
 	}
 	fclose(f);
-     */
 }
 
-void t_viech::make_perfekt_klone_of(t_viech *ancestor)
-{
-/*	int z,i,t;
-	this->chr_A=ancestor->chr_A;
-	this->chr_B=ancestor->chr_B;
-	this->length_chr_A=ancestor->length_chr_A;
-	this->length_chr_B=ancestor->length_chr_B;
-	historian.born_kloned(ancestor->history,this->history);
-
-	this->age=0;
-	this->energy=0;
-	this->heading=rand()&255;
-	this->speed=0;
-	for(z=0;z<5;z++)
-		this->protein_synth[z]=(double) 1.0;
-	if (genes!=NULL)
-	{
-		delete genes;
-		genes=NULL;
-	}
-	hmg=ancestor->hmg;
-	calc_nucleotide_needs();
-	genes=new t_gene[hmg];
-	activity=new double[hmg];
-	for(z=0;z<608;z++)
-		this->n_comp[z]=(double)0.0;
-	for(z=0;z<hmg;z++)
-		activity[z]=(double)1.0;
-
-	for(i=0;i<hmg;i++)
-	{
-	}*/
-	printf("important function missing\n");
-}
 
 int t_viech::ready_to_divide(double level,double *fitness_for_compound)
 {
@@ -690,7 +619,7 @@ int t_viech::ready_to_divide(double level,double *fitness_for_compound)
 	{
 		//r+=this->n_comp[z]*fitness_for_compound[z];
 		if((n_comp[z]>(double)0.0)&&(fitness_for_compound[z]>(double)0.0)) 
-			r*=(double)1.1+(this->n_comp[z]*fitness_for_compound[z]);
+			r*=(double)1.01+(this->n_comp[z]*fitness_for_compound[z]);
 	}
 	energy=r;
 	if(r>level)
@@ -711,3 +640,21 @@ double t_viech::get_total_n(void)
 		t+=n_comp[z];
 	return t;
 }
+
+void t_viech::saveLOD(FILE *lod,FILE *comment,FILE *data){
+    if(ancestor!=NULL)
+        ancestor->saveLOD(lod,comment, data);
+    fprintf(comment,">%i\n%s\n",born,changeLog.c_str());
+    for(int i=0;i<chromosome.size();i++){
+        for(int j=0;j<chromosome[i].size();j++)
+            fprintf(data,"%i    ",chromosome[i][j]);
+        fprintf(data,"\n");
+    }
+    fprintf(lod,"%i %f\n",born,energy);
+}
+
+t_viech* t_viech::getLMRCA(void){
+        
+}
+
+

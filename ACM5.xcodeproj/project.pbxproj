@@ -38,7 +38,7 @@
 		84AF8CD7144E02D1008F80B1 /* world.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = world.cpp; sourceTree = "<group>"; };
 		84AF8CD8144E02D1008F80B1 /* world.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = world.h; sourceTree = "<group>"; };
 		84AF8CDA144E0302008F80B1 /* viech.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = viech.cpp; sourceTree = "<group>"; };
-		84AF8CDB144E0302008F80B1 /* viech.h */ = {isa = PBXFileReference; fileEncoding = 4; path = viech.h; sourceTree = "<group>"; };
+		84AF8CDB144E0302008F80B1 /* viech.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = viech.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */

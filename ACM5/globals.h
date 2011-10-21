@@ -33,7 +33,8 @@
 
 
 const unsigned char id_active[16]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
-const unsigned char id_what[16]  ={0,1,2,2,0,1,2,2,3,4,3,4,0,1,2,2}; 
+//const unsigned char id_what[16]  ={0,1,2,2,0,1,2,2,3,4,3,4,0,1,2,2}; 
+const unsigned char id_what[16]  ={0,1,2,2,0,1,2,2,0,1,2,2,0,1,2,2}; 
 
 #define _T_GLOBALS_H_
 #endif

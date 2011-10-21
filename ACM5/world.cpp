@@ -28,7 +28,7 @@ t_world::t_world()
 			this->compound_avail[x]=(double)0.0;
 			this->fittness_for_compound[x]=(((double)x*(double)x)/((double)608*(double)608));
 			/*if (x<141) this->fittness_for_compound[x]=(double)0.0;
-			/*if ((x>230)&&(x<375)) this->fittness_for_compound[x]=(double)0.0;*/
+			if ((x>230)&&(x<375)) this->fittness_for_compound[x]=(double)0.0;*/
 		}
 		//printf("%i	%f\n",x,fittness_for_compound[x]);
 	}
@@ -49,8 +49,17 @@ void t_world::setup()
 	for(z=0;z<start_viecher;z++)
 	{
 		t_viech *dummy = new t_viech;
-		dummy->fill_chr_rand(start_chr_length_A,start_chr_length_B);
+        /*
+        if(z==0){
+            dummy->load_genome((char*)"startGenome.txt");
+        }
+        else{
+            dummy->inherit(population[0], 0.1, 0.0, 0.1);
+        }//*/
+        dummy->fill_chr_rand(start_chr_length_A,start_chr_length_B);
 		dummy->setup_proteom(chemistry);
+        //if(z==0)
+        //    dummy->showProteomNetwork(chemistry);
 		dummy->xpos=0;
 		dummy->ypos=0;
         dummy->born=currentTime;
@@ -74,7 +83,7 @@ void t_world::setup()
 
 }
 
-void t_world::run_all_viecher(void)
+void t_world::run_all_viecher(bool replace,double mutationRate,double duplicationRate,double deletionRate)
 {
 	int32_t k;
 	int u;
@@ -117,32 +126,33 @@ void t_world::run_all_viecher(void)
                 delete population[k];
             population[k]=NULL;
 		}
-	for(k=0;k<population.size();k++)
-        if(population[k]==NULL){
-            do{
-                who=rand()%population.size();
-            }while((population[who]==NULL)||(population[who]->born==currentTime)||(((double)rand()/(double)RAND_MAX)>(population[who]->energy/max_fitness)));
-			t_viech *dummy=new t_viech;
-			dummy->fill_chr_klone_of(population[who]);
-            dummy->born=currentTime;
-			dummy->mutate(1);
-			dummy->setup_proteom(chemistry);	
-			for(m=0;m<608;m++)
-			{
-				population[who]->n_comp[m]=population[who]->n_comp[m]/(double)4.0;
-				chemistry->np[m]+=population[who]->n_comp[m]*(double)2.0;
-				chemistry->np[608]+=population[who]->n_comp[m]*(double)2.0;
-				if(m<feeding_level)
-				{
-					dummy->n_comp[m]=chemistry->c(population[who]->xpos,population[who]->ypos,m)/(double)1000000.0;
-					chemistry->np[608]-=dummy->n_comp[m];
-				}
-			}
-			population[who]->get_total_n();
-			dummy->xpos=population[who]->xpos+(double)(((rand()&255)-(rand()&255))/(double)2560);
-			dummy->ypos=population[who]->ypos+(double)(((rand()&255)-(rand()&255))/(double)2560);
-            population[k]=dummy;
-        }
+    if(replace)
+        for(k=0;k<population.size();k++)
+            if(population[k]==NULL){
+                do{
+                    who=rand()%population.size();
+                }while((population[who]==NULL)||(population[who]->born==currentTime)||(((double)rand()/(double)RAND_MAX)>(population[who]->energy/max_fitness)));
+                t_viech *dummy=new t_viech;
+                dummy->inherit(population[who],mutationRate,duplicationRate,deletionRate);
+                dummy->born=currentTime;
+                dummy->setup_proteom(chemistry);	
+                for(m=0;m<608;m++)
+                {
+                    population[who]->n_comp[m]=population[who]->n_comp[m]/(double)4.0;
+                    chemistry->np[m]+=population[who]->n_comp[m]*(double)2.0;
+                    chemistry->np[608]+=population[who]->n_comp[m]*(double)2.0;
+                    if(m<feeding_level)
+                    {
+                        dummy->n_comp[m]=chemistry->c(population[who]->xpos,population[who]->ypos,m)/(double)1000000.0;
+                        chemistry->np[608]-=dummy->n_comp[m];
+                    }
+                }
+                population[who]->get_total_n();
+                dummy->get_total_n();
+                dummy->xpos=population[who]->xpos+(double)(((rand()&255)-(rand()&255))/(double)2560);
+                dummy->ypos=population[who]->ypos+(double)(((rand()&255)-(rand()&255))/(double)2560);
+                population[k]=dummy;
+            }
 }
 
 void t_world::depopulate(void)

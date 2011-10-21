@@ -26,9 +26,7 @@ public:
 	unsigned char feld[mx+1][my+1];
 	void setup(void);
 	void load_setup(int hm,int number, char *path);
-	void run_all_viecher(void);
-	void test_run_viecher(int32_t n,int iterations);
-	void test_run_activity_viecher(int32_t n,int iterations,int inactive_gene,double test_activity, int overexpressed_gene, double overexpression);
+	void run_all_viecher(bool replace,double mutationRate,double duplicationRate,double deletionRate);
 	void depopulate(void);
 };
 
