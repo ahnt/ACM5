@@ -46,17 +46,16 @@ void t_world::setup()
 	printf("	* SETUP VIECHER RANDOM...");
 	_viecher_n=start_viecher;
     order.clear();
+    t_viech *startOrganism=new t_viech;
+    startOrganism->load_genome((char*)"startGenome.txt");
+    startOrganism->setup_proteom(chemistry);
+    startOrganism->save_proteom_network((char*)"startProteom.txt", chemistry);
+    startOrganism->save_proteom_toDot((char*)"network.dot",chemistry);
 	for(z=0;z<start_viecher;z++)
 	{
-		t_viech *dummy = new t_viech;
-        /*
-        if(z==0){
-            dummy->load_genome((char*)"startGenome.txt");
-        }
-        else{
-            dummy->inherit(population[0], 0.1, 0.0, 0.1);
-        }//*/
-        dummy->fill_chr_rand(start_chr_length_A,start_chr_length_B);
+        t_viech *dummy=new t_viech;
+        dummy->inherit(startOrganism, 0.0, 0.0, 0.0);
+        //dummy->fill_chr_rand(start_chr_length_A,start_chr_length_B);
 		dummy->setup_proteom(chemistry);
         //if(z==0)
         //    dummy->showProteomNetwork(chemistry);

@@ -11,8 +11,14 @@
 #include "globals.h"
 #include "chemistry.h"
 #include "world.h"
+#include<stdio.h>
+#include<stdlib.h>
+#include<time.h>
+
+using namespace std;
 
 #define updates 100000
+
 int main (int argc, const char * argv[])
 {
     t_world *myWorld=new t_world;

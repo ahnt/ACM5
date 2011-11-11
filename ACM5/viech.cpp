@@ -335,19 +335,13 @@ void t_viech::calc_nucleotide_needs(void)
 }
 
 
-void t_viech::save_proteom_network(int name,char *path, t_chemistry *chemistry)
+void t_viech::save_proteom_network(char *filename, t_chemistry *chemistry)
 {
-    printf("WARING PROTEOM NOT SAVED!\n");
-    /*
 	char n[200],n2[100];
 	FILE *f;
 	int z;
 	int i,j;
-	strcpy(n,path);
-	_itoa_s(name,n2,100,10);
-	strcat(n,n2);
-	strcat(n,"_PNW.txt");
-	f=fopen(n,"w+t");
+	f=fopen(filename,"w+t");
 	for(z=0;z<hmg;z++)
 	{
 		switch (genes[z].ident)
@@ -453,8 +447,50 @@ void t_viech::save_proteom_network(int name,char *path, t_chemistry *chemistry)
 	}
 
 	fclose(f);
-     */
 }
+
+void t_viech::save_proteom_toDot(char *filename, t_chemistry *chemistry){
+    char n[200],n2[100];
+	FILE *f;
+	int z;
+	int i,j;
+	f=fopen(filename,"w+t");
+	fprintf(f,"digraph brain {\n");
+	for(z=0;z<hmg;z++)
+		switch(genes[z].ident)
+	{
+		case 0:
+            fprintf(f,"out%i    ->  I%i;\n",genes[z].A,z); 
+            fprintf(f,"I%i    ->  %i;\n",z,genes[z].A); 
+            break;
+		case 1:
+            fprintf(f,"O%i   ->  out%i;\n",z,genes[z].A); 
+            fprintf(f,"%i   ->  O%i;\n",genes[z].A,z); 
+            break;
+		case 2:
+            fprintf(f,"%i       ->  G%i;\n",genes[z].A,z);
+            fprintf(f,"%i       ->  G%i;\n",genes[z].B,z);
+            fprintf(f,"G%i       ->  %i;\n",z,genes[z].AP);
+            fprintf(f,"G%i       ->  %i;\n",z,genes[z].BP);
+            break;
+		case 3:
+            fprintf(f,"%i       ->  F%i;\n",genes[z].A,z);
+            fprintf(f,"%i       ->  F%i;\n",genes[z].B,z);
+            fprintf(f,"F%i       ->  %i;\n",z,genes[z].AP);
+            fprintf(f,"F%i       ->  %i;\n",z,genes[z].BP);
+            break;
+		case 4:
+            fprintf(f,"%i       ->  C%i;\n",genes[z].A,z);
+            fprintf(f,"%i       ->  C%i;\n",genes[z].B,z);
+            fprintf(f,"C%i       ->  %i;\n",z,genes[z].AP);
+            fprintf(f,"C%i       ->  %i;\n",z,genes[z].BP);
+            break;
+	}
+    
+	fprintf(f,"}\n");
+	fclose(f);
+}
+
 
 void t_viech::showProteomNetwork(t_chemistry *chemistry){
 	int z;
@@ -645,9 +681,10 @@ void t_viech::saveLOD(FILE *lod,FILE *comment,FILE *data){
     if(ancestor!=NULL)
         ancestor->saveLOD(lod,comment, data);
     fprintf(comment,">%i\n%s\n",born,changeLog.c_str());
+    fprintf(data, "%i   %i\n",(int)chromosome[0].size(),(int)chromosome[1].size());
     for(int i=0;i<chromosome.size();i++){
         for(int j=0;j<chromosome[i].size();j++)
-            fprintf(data,"%i    ",chromosome[i][j]);
+            fprintf(data,"%i\n",chromosome[i][j]);
         fprintf(data,"\n");
     }
     fprintf(lod,"%i %f\n",born,energy);

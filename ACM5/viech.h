@@ -50,7 +50,8 @@ public:
 	int32_t how_many_working_genes(void);
 	void step(t_chemistry *chemistry);
 	void calc_nucleotide_needs(void);
-	void save_proteom_network(int name,char *path, t_chemistry *chemistry);
+	void save_proteom_network(char *filename, t_chemistry *chemistry);
+    void save_proteom_toDot(char *filename, t_chemistry *chemistry);
     void showProteomNetwork(t_chemistry *chemistry);
 	void save_genome(int name);
 	void load_genome(char *filename);
